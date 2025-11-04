@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const GOOGLE_SCRIPT_URL =
-  " ";
+  "";
 
 const SHEET_ID = "1-63Zw_i7_ldl7rNXj2CBs70XtdRmdedDQUpdgUdV77w";
 

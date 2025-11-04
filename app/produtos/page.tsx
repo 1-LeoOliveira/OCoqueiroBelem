@@ -6,8 +6,8 @@ import { getEstoqueLocal } from "@/utils/googleSheets";
 // Produtos (mantendo exatamente seu layout original)
 const products = [
   // Varejo
-  { id: 1, nome: "Água de Coco 300ml", categoria: "Água de Coco", tipo: "varejo", descricao: "Garrafinha individual", preco: 5.00, imagem: "/img/300ml.png" },
-  { id: 3, nome: "Água de Coco 1L", categoria: "Água de Coco", tipo: "varejo", descricao: "Garrafa grande", preco: 15.00, imagem: "/img/1litro.png" },
+  { id: 1, nome: "Água de Coco 300ml", categoria: "Água de Coco", tipo: "varejo", descricao: "Garrafinha individual", preco: 8.00, imagem: "/img/300ml.png" },
+  { id: 3, nome: "Água de Coco 1L", categoria: "Água de Coco", tipo: "varejo", descricao: "Garrafa grande", preco: 24.00, imagem: "/img/1litro.png" },
   { id: 4, nome: "Coco Verde Inteiro", categoria: "Coco Fresco", tipo: "varejo", descricao: "Coco fresco para consumo", preco: 6.00, imagem: "/img/coco-verde.png" },
   // Atacado
   { id: 101, nome: "Coco Verde (50un)", categoria: "Coco Fresco", tipo: "atacado", descricao: "Coco Verde 50 unidades", preco: 150.00, imagem: "/img/caixa-300ml.jpg" },

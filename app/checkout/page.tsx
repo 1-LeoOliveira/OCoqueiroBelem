@@ -44,11 +44,21 @@ export default function Checkout() {
     "Retirada no Local": 0
   }), []);
   
+  // Números de WhatsApp por região
+  const telefonesRegiao = useMemo(() => ({
+    "Belém": "5591982690087",
+    "Ananindeua": "5591982690088",
+    "Outras": "5591982690089",
+    "Retirada no Local": "5591982690087"
+  }), []);
+  
   const taxa = regiao ? taxas[regiao as TipoEntrega] ?? 0 : 0;
   const subtotal = items.reduce((t, i) => t + i.preco * i.quantidade, 0);
   const total = subtotal + taxa;
   const chavePix = "ocoqueirobelem@exemplo.com";
-  const telEmpresa = "5591982690087"; // Removido o + para funcionar melhor
+  const telEmpresa = regiao ? telefonesRegiao[regiao as TipoEntrega] : "5591982690087";
+  const pedidoMinimo = 20;
+  const atingiuMinimo = subtotal >= pedidoMinimo;
 
   useEffect(() => {
     const saved = localStorage.getItem("carrinho");
@@ -82,6 +92,12 @@ export default function Checkout() {
   };
 
   const enviar = () => {
+    // Validação de pedido mínimo
+    if (!atingiuMinimo) {
+      alert(`Pedido mínimo de R$ ${pedidoMinimo.toFixed(2)}. Faltam R$ ${(pedidoMinimo - subtotal).toFixed(2)}`);
+      return;
+    }
+
     // Validações
     if (!dados.nome || !dados.telefone || !regiao) {
       alert("Preencha nome, telefone e região/tipo de entrega");
@@ -206,6 +222,19 @@ export default function Checkout() {
           <h2 className="font-semibold text-emerald-900 mb-4 flex items-center gap-2">
             📋 Resumo do Pedido
           </h2>
+          
+          {/* Alerta de pedido mínimo */}
+          {!atingiuMinimo && (
+            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-sm text-amber-800">
+                ⚠️ <strong>Pedido mínimo:</strong> R$ {pedidoMinimo.toFixed(2)}
+                <br />
+                <span className="text-amber-700">
+                  Faltam R$ {(pedidoMinimo - subtotal).toFixed(2)} para atingir o valor mínimo
+                </span>
+              </p>
+            </div>
+          )}
           
           {/* Lista de Itens */}
           <div className="space-y-2 mb-4 border-b pb-4">
@@ -410,9 +439,22 @@ export default function Checkout() {
           
           <button
             onClick={enviar}
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow-lg hover:bg-emerald-700 transition-all hover:scale-[1.02]"
+            disabled={!atingiuMinimo}
+            className={`w-full mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold shadow-lg transition-all ${
+              atingiuMinimo
+                ? "bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-[1.02] cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
-            Enviar pedido pelo WhatsApp <ChevronRight size={18} />
+            {atingiuMinimo ? (
+              <>
+                Enviar pedido pelo WhatsApp <ChevronRight size={18} />
+              </>
+            ) : (
+              <>
+                Pedido mínimo: R$ {pedidoMinimo.toFixed(2)}
+              </>
+            )}
           </button>
         </div>
       </main>
