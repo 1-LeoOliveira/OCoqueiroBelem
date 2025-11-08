@@ -28,6 +28,8 @@ const ESTOQUE_FALLBACK: Record<number, boolean> = {
   1: true,   // Água de Coco 300ml
   3: true,   // Água de Coco 1L
   4: true,   // Coco Verde Inteiro
+  5: true,   // Coco Gelado (unidade)
+  6: true,   // Kit 6 Cocos Verdes
   
   // Atacado
   101: true, // Coco Verde (50un)
@@ -334,11 +336,141 @@ export async function testarAPIEstoque() {
   }
 }
 
+// ============================================
+// FUNÇÕES PARA O PAINEL ADMIN
+// ============================================
+
+/**
+ * Atualizar disponibilidade de um produto via API
+ */
+export async function atualizarDisponibilidade(
+  produtoId: number, 
+  disponivel: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log(`[API] 📤 Atualizando produto ${produtoId} para ${disponivel ? 'disponível' : 'indisponível'}`);
+    
+    // Mapear ID do produto para linha na planilha
+    const linhaNaPlanilha = produtoId === 1 ? 2 : 
+                           produtoId === 3 ? 3 : 
+                           produtoId === 4 ? 4 : 
+                           produtoId === 5 ? 5 :
+                           produtoId === 6 ? 6 :
+                           produtoId === 101 ? 7 : 
+                           produtoId === 102 ? 8 : 
+                           produtoId === 103 ? 9 : 2;
+
+    const url = '/api/admin/atualizar-estoque';
+    const body = {
+      alteracoes: [{
+        id: produtoId,
+        linha: linhaNaPlanilha,
+        disponivel: disponivel,
+      }]
+    };
+
+    console.log('[API] 🔗 URL:', url);
+    console.log('[API] 📦 Body:', JSON.stringify(body));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    });
+
+    console.log('[API] 📡 Status:', response.status, response.statusText);
+    console.log('[API] 📄 Content-Type:', response.headers.get('content-type'));
+
+    // Verificar se é HTML (erro 404)
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      console.error('[API] ❌ Resposta é HTML, não JSON - API não encontrada!');
+      const htmlText = await response.text();
+      console.error('[API] 📄 HTML recebido:', htmlText.substring(0, 200));
+      return { 
+        success: false, 
+        error: 'API não encontrada. Verifique se o arquivo route.ts existe em app/api/admin/atualizar-estoque/' 
+      };
+    }
+
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        const textError = await response.text();
+        console.error('[API] ❌ Erro ao parsear resposta:', textError);
+        return { 
+          success: false, 
+          error: `HTTP ${response.status}: ${textError}` 
+        };
+      }
+      console.error('[API] ❌ Erro na resposta:', errorData);
+      return { 
+        success: false, 
+        error: errorData.error || `HTTP ${response.status}` 
+      };
+    }
+
+    const data = await response.json();
+    console.log('[API] ✅ Resposta:', data);
+
+    if (data.erros > 0) {
+      return { 
+        success: false, 
+        error: `${data.erros} erro(s) ao atualizar` 
+      };
+    }
+
+    // Atualizar cache local
+    const novoEstoque = getEstoqueLocal();
+    novoEstoque[produtoId] = disponivel;
+    setEstoqueLocal(novoEstoque);
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('[API] 💥 Erro ao atualizar:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Erro desconhecido' 
+    };
+  }
+}
+
+/**
+ * Broadcast de estoque atualizado para outros componentes
+ */
+export function broadcastEstoque(estoque: Record<number, boolean>) {
+  console.log('[Broadcast] 📡 Transmitindo atualização de estoque');
+  
+  // Atualizar cache local
+  setEstoqueLocal(estoque);
+  
+  // Disparar evento customizado
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('estoqueAtualizado', { 
+      detail: estoque 
+    }));
+    
+    // Também disparar evento de storage para sincronizar entre abas
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'coqueiro_estoque_update',
+      newValue: JSON.stringify(estoque),
+      url: window.location.href
+    }));
+  }
+}
+
 // Expor no console
 if (typeof window !== 'undefined') {
   (window as any).testarEstoque = testarAPIEstoque;
   (window as any).getEstoqueAtual = getEstoqueLocal;
+  (window as any).atualizarDisponibilidade = atualizarDisponibilidade;
   console.log('🔧 Debug disponível:');
   console.log('  - window.testarEstoque() - Testar API');
   console.log('  - window.getEstoqueAtual() - Ver estoque em cache');
+  console.log('  - window.atualizarDisponibilidade(id, disponivel) - Atualizar produto');
 }

@@ -28,8 +28,8 @@ interface EstoqueState {
 
 // Produtos do Coqueiro Belém
 const produtos: Produto[] = [
-  { id: 1, nome: "Água de Coco Natural 300ml", categoria: "Água de Coco", preco: 5.0, imagem: "/img/300ml.png" },
-  { id: 3, nome: "Água de Coco Natural 1L", categoria: "Água de Coco", preco: 15.0, imagem: "/img/1litro.png" },
+  { id: 1, nome: "Água de Coco Natural 300ml", categoria: "Água de Coco", preco: 8.0, imagem: "/img/300ml.png" },
+  { id: 3, nome: "Água de Coco Natural 1L", categoria: "Água de Coco", preco: 24.0, imagem: "/img/1litro.png" },
   { id: 4, nome: "Coco Verde Inteiro", categoria: "Coco Fresco", preco: 6.0, imagem: "/img/coco-verde.png" },
   { id: 5, nome: "Coco Gelado (unidade)", categoria: "Coco Fresco", preco: 7.0, imagem: "/img/coco-gelado.jpg" },
   { id: 6, nome: "Kit 6 Cocos Verdes", categoria: "Coco Fresco", preco: 35.0, imagem: "/img/kit-6-cocos.jpg" },
