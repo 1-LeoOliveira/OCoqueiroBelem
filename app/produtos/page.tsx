@@ -10,9 +10,9 @@ const products = [
   { id: 3, nome: "Água de Coco 1L", categoria: "Água de Coco", tipo: "varejo", descricao: "Garrafa grande", preco: 24.00, imagem: "/img/1litro.png" },
   { id: 4, nome: "Coco Verde Inteiro", categoria: "Coco Fresco", tipo: "varejo", descricao: "Coco fresco para consumo", preco: 6.00, imagem: "/img/coco-verde.png" },
   // Atacado
-  { id: 101, nome: "Coco Verde (50un)", categoria: "Coco Fresco", tipo: "atacado", descricao: "Coco Verde 50 unidades", preco: 150.00, imagem: "/img/caixa-300ml.jpg" },
-  { id: 102, nome: "Caixa Água de Coco 300ml (12un)", categoria: "Água de Coco", tipo: "atacado", descricao: "Caixa com 12 unidades", preco: 60.00, imagem: "/img/caixa-500ml.jpg" },
-  { id: 103, nome: "Caixa Água de Coco 1L (6un)", categoria: "Água de Coco", tipo: "atacado", descricao: "Caixa com 6 unidades", preco: 90.00, imagem: "/img/caixa-1l.jpg" },
+  { id: 101, nome: "Coco Verde (50un)", categoria: "Coco Fresco", tipo: "atacado", descricao: "Coco Verde 50 unidades", preco: 150.00, imagem: "/img/50un.png" },
+  { id: 102, nome: "Caixa Água de Coco 300ml (12un)", categoria: "Água de Coco", tipo: "atacado", descricao: "Caixa com 12 unidades", preco: 60.00, imagem: "/img/fardo300ml.png" },
+  { id: 103, nome: "Caixa Água de Coco 1L (6un)", categoria: "Água de Coco", tipo: "atacado", descricao: "Caixa com 6 unidades", preco: 90.00, imagem: "/img/fardo1L.png" },
 ];
 
 const categorias = Array.from(new Set(products.map(p => p.categoria)));
