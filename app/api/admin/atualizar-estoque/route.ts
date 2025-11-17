@@ -1,5 +1,8 @@
-// app/api/admin/atualizar-estoque/route.ts
-// IMPORTANTE: Este arquivo deve estar em: app/api/admin/atualizar-estoque/route.ts
+// ============================================
+// ARQUIVO: app/api/admin/atualizar-estoque/route.ts
+// ⚠️ IMPORTANTE: Este arquivo DEVE estar neste caminho exato!
+// ============================================
+
 import { NextRequest, NextResponse } from 'next/server';
 
 // ============================================
@@ -12,10 +15,10 @@ const SPREADSHEET_ID = '1-63Zw_i7_ldl7rNXj2CBs70XtdRmdedDQUpdgUdV77w';
 // TIPOS
 // ============================================
 interface AlteracaoEstoque {
-  id: number;              // ID do produto
-  linha: number;           // Linha na planilha (começa em 2)
-  disponivel: boolean;     // Novo status de disponibilidade
-  nome?: string;           // Nome do produto (opcional, para logs)
+  id: number;
+  linha: number;
+  disponivel: boolean;
+  nome?: string;
 }
 
 interface RequestBody {
@@ -27,12 +30,16 @@ interface RequestBody {
 // ENDPOINT GET - Teste de Saúde
 // ============================================
 export async function GET() {
+  console.log('[API Route] 📡 GET recebido - API funcionando!');
+  
   return NextResponse.json({
     status: 'OK',
-    message: 'API de estoque funcionando!',
+    message: '✅ API de estoque do Coqueiro Belém funcionando!',
     timestamp: new Date().toISOString(),
-    scriptConfigured: true,
-    projeto: 'O Coqueiro Belém'
+    scriptConfigured: SCRIPT_URL.includes('AKfy'),
+    projeto: 'O Coqueiro Belém',
+    version: '2.0',
+    endpoint: '/api/admin/atualizar-estoque'
   });
 }
 
@@ -41,60 +48,68 @@ export async function GET() {
 // ============================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('[API] 📄 Recebendo requisição POST...');
+    console.log('[API Route] 📥 POST recebido');
     
     const body: RequestBody = await request.json();
-    console.log('[API] 📦 Dados recebidos:', body);
+    console.log('[API Route] 📦 Body:', JSON.stringify(body, null, 2));
     
     const { alteracoes, spreadsheetId = SPREADSHEET_ID } = body;
 
     // Validações
     if (!alteracoes || !Array.isArray(alteracoes)) {
+      console.error('[API Route] ❌ Dados inválidos');
       return NextResponse.json({ 
         error: 'Dados inválidos: alteracoes deve ser um array' 
       }, { status: 400 });
     }
 
     if (alteracoes.length === 0) {
+      console.error('[API Route] ❌ Array vazio');
       return NextResponse.json({ 
         error: 'Nenhuma alteração fornecida' 
       }, { status: 400 });
     }
 
-    console.log(`[API] 💾 Processando ${alteracoes.length} alterações de estoque...`);
+    console.log(`[API Route] 🔄 Processando ${alteracoes.length} alterações...`);
 
-    // Processar alterações em paralelo
+    // Processar alterações
     const results = await Promise.allSettled(
       alteracoes.map(async (alteracao) => {
         try {
           const produtoInfo = alteracao.nome ? ` (${alteracao.nome})` : '';
-          console.log(`[API] 🔧 Atualizando produto ${alteracao.id}${produtoInfo} na linha ${alteracao.linha}`);
+          console.log(`[API Route] 📝 Atualizando produto ${alteracao.id}${produtoInfo} - Linha ${alteracao.linha} - Valor: ${alteracao.disponivel}`);
+          
+          const payload = {
+            action: 'updateCell',
+            spreadsheetId,
+            range: `Sheet1!C${alteracao.linha}`,
+            value: alteracao.disponivel ? 'TRUE' : 'FALSE'
+          };
+
+          console.log(`[API Route] 🌐 Enviando para Google Apps Script:`, payload);
           
           const response = await fetch(SCRIPT_URL, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              action: 'updateCell',
-              spreadsheetId,
-              range: `Sheet1!C${alteracao.linha}`, // Coluna C = Disponivel
-              value: alteracao.disponivel ? 'TRUE' : 'FALSE'
-            })
+            body: JSON.stringify(payload)
           });
+
+          console.log(`[API Route] 📡 Resposta do Google: Status ${response.status}`);
 
           if (!response.ok) {
             const errorText = await response.text();
+            console.error(`[API Route] ❌ Erro HTTP ${response.status}:`, errorText);
             throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
 
           const resultado = await response.json();
+          console.log(`[API Route] ✅ Resultado do Google:`, resultado);
           
           if (!resultado.success) {
             throw new Error(resultado.error || 'Erro do Google Apps Script');
           }
-
-          console.log(`[API] ✅ Produto ${alteracao.id} atualizado com sucesso`);
 
           return { 
             sucesso: true, 
@@ -104,7 +119,7 @@ export async function POST(request: NextRequest) {
           };
 
         } catch (error) {
-          console.error(`[API] ❌ Erro ao atualizar produto ${alteracao.id}:`, error);
+          console.error(`[API Route] ❌ Erro ao atualizar produto ${alteracao.id}:`, error);
           return { 
             sucesso: false, 
             id: alteracao.id,
@@ -124,17 +139,8 @@ export async function POST(request: NextRequest) {
       (result.status === 'fulfilled' && !result.value.sucesso)
     );
 
-    const detalhesErros = erros.map(result => {
-      if (result.status === 'rejected') {
-        return { erro: result.reason };
-      } else if (result.status === 'fulfilled') {
-        return result.value;
-      }
-      return null;
-    }).filter(Boolean);
+    console.log(`[API Route] 📊 Resultado final: ${sucessos} sucessos, ${erros.length} erros`);
 
-    console.log(`[API] 📊 Resultado: ${sucessos} sucessos, ${erros.length} erros`);
-    
     const response = {
       sucesso: sucessos,
       erros: erros.length,
@@ -146,36 +152,13 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     };
 
-    if (detalhesErros.length > 0) {
-      (response as any).detalhesErros = detalhesErros;
-    }
-
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('[API] ❌ Erro geral:', error);
+    console.error('[API Route] ❌ Erro geral:', error);
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Erro interno do servidor',
       timestamp: new Date().toISOString()
     }, { status: 500 });
-  }
-}
-
-// ============================================
-// FUNÇÕES AUXILIARES
-// ============================================
-
-/**
- * Buscar linha do produto por ID
- * Útil se você não souber a linha exata
- */
-export async function buscarLinhaPorId(produtoId: number): Promise<number | null> {
-  try {
-    // Esta função assumiria que você tem outra API para buscar
-    // Por enquanto, retorna null (implementar se necessário)
-    return null;
-  } catch (error) {
-    console.error('[API] Erro ao buscar linha:', error);
-    return null;
   }
 }
