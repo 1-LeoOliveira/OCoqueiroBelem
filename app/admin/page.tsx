@@ -119,7 +119,6 @@ export default function AdminCoqueiroPage() {
   };
 
   const categorias = ["Todas", ...Array.from(new Set(produtos.map((p) => p.categoria)))];
-  
   const produtosFiltrados = produtos.filter((p) => {
     const matchCat = filtroCategoria === "Todas" || p.categoria === filtroCategoria;
     const matchTipo = filtroTipo === "Todos" || p.tipo === filtroTipo;
@@ -156,7 +155,7 @@ export default function AdminCoqueiroPage() {
             <a href="/" className="flex items-center text-emerald-700 hover:text-emerald-900">
               <Home size={20} className="mr-2" /> Site
             </a>
-            <h1 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
+            <h1 className="text-xl font-bold text-black flex items-center gap-2">
               <Droplets className="text-emerald-600" size={24} />
               Admin - O Coqueiro Belém
             </h1>
@@ -190,7 +189,7 @@ export default function AdminCoqueiroPage() {
             <select
               value={filtroCategoria}
               onChange={(e) => setFiltroCategoria(e.target.value)}
-              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
             >
               {categorias.map((cat: string) => (
                 <option key={cat}>{cat}</option>
@@ -200,7 +199,7 @@ export default function AdminCoqueiroPage() {
             <select
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value as any)}
-              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
             >
               <option value="Todos">Todos os tipos</option>
               <option value="varejo">🛒 Varejo</option>
@@ -210,7 +209,7 @@ export default function AdminCoqueiroPage() {
             <select
               value={filtroStatus}
               onChange={(e) => setFiltroStatus(e.target.value)}
-              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
             >
               <option>Todos</option>
               <option>Disponíveis</option>
@@ -221,7 +220,7 @@ export default function AdminCoqueiroPage() {
 
         {/* Info de produtos filtrados */}
         {produtosFiltrados.length !== total && (
-          <div className="mb-4 text-center text-sm text-emerald-600">
+          <div className="mb-4 text-center text-sm text-black">
             Exibindo {produtosFiltrados.length} de {total} produtos
           </div>
         )}
@@ -243,7 +242,7 @@ export default function AdminCoqueiroPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-emerald-900 text-sm">{p.nome}</h3>
+                      <h3 className="font-semibold text-black text-sm">{p.nome}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         p.tipo === "varejo" 
                           ? "bg-blue-100 text-blue-700" 
@@ -252,9 +251,9 @@ export default function AdminCoqueiroPage() {
                         {p.tipo === "varejo" ? "🛒" : "📦"}
                       </span>
                     </div>
-                    <p className="text-xs text-emerald-600 mb-2">{p.categoria}</p>
+                    <p className="text-xs text-black mb-2">{p.categoria}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-emerald-800">
+                      <span className="text-lg font-bold text-black">
                         R$ {p.preco.toFixed(2)}
                       </span>
                       <button
@@ -287,7 +286,7 @@ export default function AdminCoqueiroPage() {
         {produtosFiltrados.length === 0 && (
           <div className="text-center py-12">
             <Package className="mx-auto mb-4 text-gray-400" size={48} />
-            <p className="text-gray-600">Nenhum produto encontrado com os filtros aplicados</p>
+            <p className="text-black">Nenhum produto encontrado com os filtros aplicados</p>
           </div>
         )}
       </div>
@@ -300,8 +299,8 @@ function Card({ title, value, icon }: any) {
     <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-emerald-600 font-medium">{title}</p>
-          <p className="text-2xl font-bold text-emerald-900">{value}</p>
+          <p className="text-sm text-black font-medium">{title}</p>
+          <p className="text-2xl font-bold text-black">{value}</p>
         </div>
         {icon}
       </div>

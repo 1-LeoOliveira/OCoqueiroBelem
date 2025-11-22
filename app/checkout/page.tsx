@@ -40,12 +40,12 @@ export default function Checkout() {
   const taxas = useMemo(() => ({
     "Belém-Centro": 0,
     "Icoaraci/Augusto Montenegro": 15,
-    "Marco": 10,
-    "Pedreira": 10,
-    "Telegrafo": 10,
-    "Sacramenta": 10,
-    "Souza": 10,
-    "Marambaia": 10,
+    "Marco": 5,
+    "Pedreira": 5,
+    "Telegrafo": 5,
+    "Sacramenta": 5,
+    "Souza": 5,
+    "Marambaia": 5,
     "Ananideua / Br316": 20,
     "Retirada no Local": 0
   }), []);
@@ -293,12 +293,12 @@ export default function Checkout() {
             <option value="Retirada no Local">🏪 Retirada no Local (Grátis)</option>
             <option value="Belém-Centro">🚚 Entrega em Belém-Centro (Grátis)</option>
             <option value="Icoaraci/Augusto Montenegro">🚚 Entrega em Icoaraci / Augusto Montenegro (R$ 15,00)</option>
-            <option value="Marco">🚚 Entrega em Marco (R$ 10,00)</option>
-            <option value="Pedreira">🚚 Entrega em Pedreira (R$ 10,00)</option>
-            <option value="Telegrafo">🚚 Entrega em Telegrafo (R$ 10,00)</option>
-            <option value="Sacramenta">🚚 Entrega em Sacramenta (R$ 10,00)</option>
-            <option value="Souza">🚚 Entrega em Souza (R$ 10,00)</option>
-            <option value="Marambaia">🚚 Entrega em Marambaia (R$ 10,00)</option>
+            <option value="Marco">🚚 Entrega em Marco (R$ 5,00)</option>
+            <option value="Pedreira">🚚 Entrega em Pedreira (R$ 5,00)</option>
+            <option value="Telegrafo">🚚 Entrega em Telegrafo (R$ 5,00)</option>
+            <option value="Sacramenta">🚚 Entrega em Sacramenta (R$ 5,00)</option>
+            <option value="Souza">🚚 Entrega em Souza (R$ 5,00)</option>
+            <option value="Marambaia">🚚 Entrega em Marambaia (R$ 5,00)</option>
             <option value="Ananideua / Br316">🚚 Entrega em Ananideua / BR 316 (R$ 20,00)</option>
           </select>
 

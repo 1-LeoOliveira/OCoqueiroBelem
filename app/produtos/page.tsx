@@ -63,7 +63,12 @@ export default function ProdutosPage() {
     return filtered;
   }, [categoriaSelecionada, tipoVenda]);
 
-  const adicionarAoCarrinho = (produto: typeof products[0]) => {
+  // ✅ Calcular total de itens no carrinho (soma das quantidades)
+  const totalItensCarrinho = useMemo(() => {
+    return cart.reduce((total, item) => total + item.quantidade, 0);
+  }, [cart]);
+
+  const adicionarAoCarrinho = (produto: typeof products[0], event?: React.MouseEvent) => {
     // ✅ Usar a função do hook para verificar disponibilidade
     const disponivel = isProdutoDisponivel(produto.id);
     
@@ -79,6 +84,82 @@ export default function ProdutosPage() {
     }
 
     console.log(`[Produtos] ✅ Adicionando produto ${produto.id} ao carrinho`);
+
+    // ✨ Animação profissional de arrastar para o carrinho
+    if (event) {
+      const target = event.currentTarget as HTMLElement;
+      const productCard = target.closest('.product-card') as HTMLElement;
+      const productImage = productCard?.querySelector('img') as HTMLImageElement;
+      
+      if (productImage) {
+        const cartIcon = document.querySelector('.cart-icon') as HTMLElement;
+        if (cartIcon) {
+          // Cria um container para a animação
+          const animationContainer = document.createElement('div');
+          animationContainer.className = 'cart-animation-container';
+          
+          // Clone da imagem
+          const clone = productImage.cloneNode(true) as HTMLImageElement;
+          const rect = productImage.getBoundingClientRect();
+          const cartRect = cartIcon.getBoundingClientRect();
+          
+          // Estilo inicial do container
+          animationContainer.style.position = 'fixed';
+          animationContainer.style.left = `${rect.left}px`;
+          animationContainer.style.top = `${rect.top}px`;
+          animationContainer.style.width = `${rect.width}px`;
+          animationContainer.style.height = `${rect.height}px`;
+          animationContainer.style.zIndex = '9999';
+          animationContainer.style.pointerEvents = 'none';
+          animationContainer.style.borderRadius = '12px';
+          animationContainer.style.overflow = 'hidden';
+          animationContainer.style.boxShadow = '0 8px 32px rgba(16, 185, 129, 0.3)';
+          animationContainer.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          
+          // Estilo do clone
+          clone.style.width = '100%';
+          clone.style.height = '100%';
+          clone.style.objectFit = 'contain';
+          clone.style.backgroundColor = 'white';
+          
+          animationContainer.appendChild(clone);
+          document.body.appendChild(animationContainer);
+          
+          // Adiciona efeito de pulso no carrinho
+          cartIcon.style.transition = 'transform 0.3s ease';
+          
+          // Força reflow
+          animationContainer.offsetHeight;
+          
+          // Anima para o carrinho com efeito de curva
+          requestAnimationFrame(() => {
+            const targetX = cartRect.left + cartRect.width / 2;
+            const targetY = cartRect.top + cartRect.height / 2;
+            
+            animationContainer.style.left = `${targetX}px`;
+            animationContainer.style.top = `${targetY}px`;
+            animationContainer.style.width = '50px';
+            animationContainer.style.height = '50px';
+            animationContainer.style.opacity = '0';
+            animationContainer.style.transform = 'scale(0.2) rotate(180deg)';
+            animationContainer.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.6)';
+            
+            // Pulso no carrinho
+            setTimeout(() => {
+              cartIcon.style.transform = 'scale(1.3)';
+              setTimeout(() => {
+                cartIcon.style.transform = 'scale(1)';
+              }, 200);
+            }, 500);
+          });
+          
+          // Remove após animação
+          setTimeout(() => {
+            animationContainer.remove();
+          }, 700);
+        }
+      }
+    }
 
     setCart((prev) => {
       const existente = prev.find((i) => i.id === produto.id);
@@ -116,11 +197,11 @@ export default function ProdutosPage() {
             <Leaf size={20} className="text-emerald-600" />
             Produtos O Coqueiro
           </h1>
-          <a href="/pedidos" className="relative text-emerald-700 hover:text-emerald-900 transition-colors">
+          <a href="/pedidos" className="relative text-emerald-700 hover:text-emerald-900 transition-colors cart-icon">
             <ShoppingCart size={24} />
-            {cart.length > 0 && (
+            {totalItensCarrinho > 0 && (
               <span className="absolute -top-2 -right-2 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 grid place-items-center font-semibold">
-                {cart.length}
+                {totalItensCarrinho}
               </span>
             )}
           </a>
@@ -139,11 +220,11 @@ export default function ProdutosPage() {
             O Coqueiro
           </h1>
 
-          <a href="/pedidos" className="relative text-emerald-700 p-2">
+          <a href="/pedidos" className="relative text-emerald-700 p-2 cart-icon">
             <ShoppingCart size={22} />
-            {cart.length > 0 && (
+            {totalItensCarrinho > 0 && (
               <span className="absolute top-0 right-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 grid place-items-center font-semibold">
-                {cart.length}
+                {totalItensCarrinho}
               </span>
             )}
           </a>
@@ -155,7 +236,7 @@ export default function ProdutosPage() {
               <Home size={18} /> Página Inicial
             </a>
             <a href="/pedidos" className="flex items-center gap-3 px-4 py-3 text-emerald-700 hover:bg-emerald-50 transition-colors" onClick={() => setMenuOpen(false)}>
-              <ShoppingCart size={18} /> Meu Carrinho ({cart.length})
+              <ShoppingCart size={18} /> Meu Carrinho ({totalItensCarrinho} {totalItensCarrinho === 1 ? 'item' : 'itens'})
             </a>
           </div>
         )}
@@ -249,7 +330,7 @@ export default function ProdutosPage() {
           return (
             <div
               key={p.id}
-              className={`relative bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden transition-all duration-300 ${
+              className={`product-card relative bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden transition-all duration-300 ${
                 recentlyAdded === p.id
                   ? "animate-pop border-emerald-300 shadow-emerald-200"
                   : disponivel 
@@ -259,7 +340,7 @@ export default function ProdutosPage() {
             >
               {/* Container da imagem */}
               <div 
-                onClick={() => disponivel && adicionarAoCarrinho(p)} 
+                onClick={(e) => disponivel && adicionarAoCarrinho(p, e)} 
                 className={`relative w-full h-40 md:h-48 flex items-center justify-center overflow-hidden transition-colors ${
                   disponivel 
                     ? "cursor-pointer hover:bg-emerald-50 bg-white" 
@@ -289,7 +370,7 @@ export default function ProdutosPage() {
 
               {/* Conteúdo do card */}
               <div 
-                onClick={() => disponivel && adicionarAoCarrinho(p)} 
+                onClick={(e) => disponivel && adicionarAoCarrinho(p, e)} 
                 className={`flex flex-col flex-1 p-4 md:p-5 ${
                   disponivel ? "cursor-pointer" : "cursor-not-allowed"
                 }`}
@@ -318,7 +399,7 @@ export default function ProdutosPage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (disponivel) {
-                        adicionarAoCarrinho(p);
+                        adicionarAoCarrinho(p, e);
                       }
                     }}
                     className={`px-3 md:px-4 py-2 rounded-lg font-medium text-xs md:text-sm transition-all duration-200 ${
@@ -348,11 +429,11 @@ export default function ProdutosPage() {
 
       {/* Botão Flutuante Mobile */}
       <div className="md:hidden fixed bottom-4 right-4 z-30">
-        <a href="/pedidos" className="bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-emerald-700 transition-colors relative">
+        <a href="/pedidos" className="cart-icon bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-emerald-700 transition-all relative">
           <ShoppingCart size={24} />
-          {cart.length > 0 && (
+          {totalItensCarrinho > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 grid place-items-center font-bold">
-              {cart.length}
+              {totalItensCarrinho}
             </span>
           )}
         </a>
